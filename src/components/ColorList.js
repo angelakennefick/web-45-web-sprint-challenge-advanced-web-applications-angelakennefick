@@ -1,22 +1,61 @@
 import React, { useState } from "react";
+import EditMenu from './EditMenu'
+import { axiosWithAuth } from "../helpers/axiosWithAuth";
+import Color from './Color'
 
-import Color from './Color';
-import EditMenu from './EditMenu';
+const initialColor = {
+  color: "",
+  code: { hex: "" }
+};
+const ColorList = ({ colors, updateColors }) => {
+  const [editing, setEditing] = useState(false);
+  const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const editColor = color => {
+    setEditing(true);
+    setColorToEdit(color);
+  };
 
-const ColorList = (props) => {
-  const { colors, editing, toggleEdit, saveEdit, deleteColor } = props;
-  const [ editColor, setEditColor] = useState({ color: "", code: { hex: "" }});
+  const saveEdit = e => {
+    e.preventDefault();
+
+    axiosWithAuth()
+    .put(`/colors/${colorToEdit.id}`, colorToEdit)
+    .then((res) => {
+      updateColors(
+        colors.map((col) => {
+          if (col.id === res.data.id) {
+            return res.data;
+          } else {
+            return col;
+          }
+        })
+      );
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  };
+
+  const deleteColor = color => {
+    axiosWithAuth()
+      .delete(`/colors/${color.id}`)
+      .then((res) => {
+        updateColors(colors.filter((col) => col.id !== Number(res.data)));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   return (
     <div className="colors-wrap">
-      <p id="color_title">colors</p>
+      <p>colors</p>
       <ul>
-        {colors.map(color => <Color key={color.id} setEditColor={setEditColor} color={color} toggleEdit={toggleEdit} deleteColor={deleteColor}/>)}
+        {colors.map(color => <Color key={color.id} editing={editing} color={color} editColor={editColor} deleteColor={deleteColor}/>)}
       </ul>
       
-      {editing && <EditMenu editColor={editColor} setEditColor={setEditColor} toggleEdit={toggleEdit} saveEdit={saveEdit}/>}
+      { editing && <EditMenu colorToEdit={colorToEdit} saveEdit={saveEdit} setColorToEdit={setColorToEdit} setEditing={setEditing}/> }
     </div>
   );
 };
-
 export default ColorList;

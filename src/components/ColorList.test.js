@@ -1,14 +1,41 @@
-import React from 'react';
-import MutationObserver from 'mutationobserver-shim';
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
+import BubblePage from "./BubblePage";
+import {fetchColors as fakeFetchColors} from './fetchColors'
+jest.mock('./fetchColors')
 
-import { render, screen} from "@testing-library/react";
-import ColorList from './ColorList';
+const fakeColors = [
+  {
+    color: "aliceblue",
+    code: {
+      hex: "#f0f8ff",
+    },
+    id: 1,
+  },
+  {
+    color: "limegreen",
+    code: {
+      hex: "#99ddbc",
+    },
+    id: 2,
+  },
+  {
+    color: "aqua",
+    code: {
+      hex: "#00ffff",
+    },
+    id: 3,
+  }
+]
 
-test("Renders an empty list of colors without errors", () => {
+test("Renders BubblePage without errors", () => {
+    
+  render(<BubblePage/>);
+
 });
 
-test("Renders a list of colors without errors", () => {
-});
+test("Fetches data and renders the bubbles on mounting", async () => {
+    render(<BubblePage/>)
+  fakeFetchColors.mockResolvedValueOnce(fakeColors)
 
-test("Renders the EditForm when editing = true and does not render EditForm when editing = false", () => {
 });
